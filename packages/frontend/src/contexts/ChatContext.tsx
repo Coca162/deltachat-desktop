@@ -15,6 +15,10 @@ export type SelectChat = (nextAccountId: number, chatId: number) => void
 
 export type UnselectChat = () => void
 
+export type SetOverrideName = (overrideName: string) => void
+
+export type WipeOverrideName = () => void
+
 export type ChatContextValue = {
   /**
    * `withLinger` means that after `selectChat()` the value of `chatWithLinger`
@@ -34,6 +38,10 @@ export type ChatContextValue = {
    */
   selectChat: SelectChat
   unselectChat: UnselectChat
+
+  overrideName?: string
+  setOverrideName: SetOverrideName
+  wipeOverrideName: WipeOverrideName
 }
 
 type Props = {
@@ -94,6 +102,8 @@ export const ChatProvider = ({
     },
     [sessionId]
   )
+
+  const [overrideName, _setOverrideName] = useState<string | undefined>()
 
   useEffect(() => {
     window.__selectedChatId = chatId
@@ -273,6 +283,17 @@ export const ChatProvider = ({
     }
   }, [accountId, chatWithLinger, chatId, refreshChat])
 
+  const setOverrideName = useCallback<SetOverrideName>(
+    (overrideName: string) => {
+      _setOverrideName(overrideName)
+    },
+    []
+  )
+
+  const wipeOverrideName = useCallback<WipeOverrideName>(() => {
+    _setOverrideName(undefined)
+  }, [])
+
   const loadingChat = chatFetch?.loading ?? false
   const value: ChatContextValue = useMemo(
     () => ({
@@ -282,6 +303,9 @@ export const ChatProvider = ({
       chatId,
       selectChat,
       unselectChat,
+      overrideName,
+      setOverrideName,
+      wipeOverrideName,
     }),
     [
       chatWithLinger,
@@ -290,6 +314,9 @@ export const ChatProvider = ({
       chatId,
       selectChat,
       unselectChat,
+      overrideName,
+      setOverrideName,
+      wipeOverrideName,
     ]
   )
 

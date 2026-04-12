@@ -4,6 +4,7 @@ import { ActionEmitter, KeybindAction } from '../../keybindings'
 import { getLogger } from '@deltachat-desktop/shared/logger'
 import { DialogContext } from '../../contexts/DialogContext'
 import { I18nContext } from '../../contexts/I18nContext'
+import { ChatContext } from '../../contexts/ChatContext'
 
 const log = getLogger('renderer/composer/ComposerMessageInput')
 
@@ -169,9 +170,12 @@ export default class ComposerMessageInput extends React.Component<ComposerMessag
     if (this.props.hidden) {
       return null
     }
+    // prettier-ignore
     return (
       <I18nContext.Consumer>
         {({ writingDirection }) => (
+      <ChatContext.Consumer>
+          {chatContext => (
           <textarea
             className='create-or-edit-message-input'
             style={{ '--maxLines': maxLines } as React.CSSProperties}
@@ -191,7 +195,9 @@ export default class ComposerMessageInput extends React.Component<ComposerMessag
             placeholder={
               this.props.isMessageEditingMode
                 ? window.static_translate('edit_message')
-                : window.static_translate('write_message_desktop')
+                : chatContext?.overrideName === undefined
+                  ? window.static_translate('write_message_desktop')
+                  : `${window.static_translate('write_message_desktop')} as ${chatContext?.overrideName}`
             }
             disabled={this.props.loadingDraft}
             dir={
@@ -202,6 +208,8 @@ export default class ComposerMessageInput extends React.Component<ComposerMessag
             spellCheck={true}
             aria-keyshortcuts='Control+M'
           />
+        )}
+      </ChatContext.Consumer>
         )}
       </I18nContext.Consumer>
     )
