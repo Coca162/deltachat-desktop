@@ -197,7 +197,7 @@ const ForwardedTitle = ({
               key='displayname'
               style={{ color: color }}
             >
-              {overrideSenderName ? `~${overrideSenderName}` : displayName}
+              {overrideSenderName ?? displayName}
             </button>
           )
         )
@@ -1152,7 +1152,7 @@ export function getAuthorName(
   displayName: string,
   overrideSenderName?: string | null
 ) {
-  return overrideSenderName ? `~${overrideSenderName}` : displayName
+  return overrideSenderName ?? displayName
 }
 
 function WebxdcMessageContent({

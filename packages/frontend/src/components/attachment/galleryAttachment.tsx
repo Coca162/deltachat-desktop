@@ -453,9 +453,7 @@ export function AudioAttachment({
       >
         <div className='heading'>
           <div className='name'>
-            {message?.overrideSenderName
-              ? `~${message.overrideSenderName}`
-              : message?.sender?.displayName}
+            {message?.overrideSenderName ?? message?.sender?.displayName}
           </div>
           <Timestamp
             timestamp={message?.timestamp * 1000}
