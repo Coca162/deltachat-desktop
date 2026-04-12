@@ -46,7 +46,7 @@
           cargo
           cargo-tauri
           nodejs_22 # what electron uses
-          electron_37 # electron version should be same as defined in packages/target-electron/package.json
+          electron_41 # electron version should be same as defined in packages/target-electron/package.json
         ];
 
         buildInputs = with pkgs; [
