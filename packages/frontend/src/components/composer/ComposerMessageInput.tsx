@@ -4,6 +4,7 @@ import { ActionEmitter, KeybindAction } from '../../keybindings'
 import { getLogger } from '../../../../shared/logger'
 import { DialogContext } from '../../contexts/DialogContext'
 import { I18nContext } from '../../contexts/I18nContext'
+import { ChatContext } from '../../contexts/ChatContext'
 
 const log = getLogger('renderer/composer/ComposerMessageInput')
 
@@ -236,41 +237,47 @@ export default class ComposerMessageInput extends React.Component<
     return (
       <I18nContext.Consumer>
         {({ writingDirection }) => (
-          <textarea
-            className={
-              'create-or-edit-message-input' +
-              (browserSupportsCSSFieldSizing
-                ? ' use-field-sizing-css-prop'
-                : '')
-            }
-            style={{ '--maxLines': maxLines } as React.CSSProperties}
-            id={
-              this.props.isMessageEditingMode
-                ? 'composer-textarea-edit'
-                : 'composer-textarea-non-edit'
-            }
-            ref={this.textareaRef}
-            rows={1}
-            // intent={this.state.error ? 'danger' : 'none'}
-            // large
-            value={this.props.text}
-            onKeyDown={this.onKeyDown}
-            onChange={this.onChange}
-            onPaste={this.props.onPaste}
-            placeholder={
-              this.props.isMessageEditingMode
-                ? window.static_translate('edit_message')
-                : window.static_translate('write_message_desktop')
-            }
-            disabled={this.props.loadingDraft}
-            dir={
-              writingDirection === 'rtl'
-                ? 'rtl'
-                : 'auto' /* auto is based on content but defaults to ltr */
-            }
-            spellCheck={true}
-            aria-keyshortcuts='Control+M'
-          />
+          <ChatContext.Consumer>
+            {chatContext => (
+              <textarea
+                className={
+                  'create-or-edit-message-input' +
+                  (browserSupportsCSSFieldSizing
+                    ? ' use-field-sizing-css-prop'
+                    : '')
+                }
+                style={{ '--maxLines': maxLines } as React.CSSProperties}
+                id={
+                  this.props.isMessageEditingMode
+                    ? 'composer-textarea-edit'
+                    : 'composer-textarea-non-edit'
+                }
+                ref={this.textareaRef}
+                rows={1}
+                // intent={this.state.error ? 'danger' : 'none'}
+                // large
+                value={this.props.text}
+                onKeyDown={this.onKeyDown}
+                onChange={this.onChange}
+                onPaste={this.props.onPaste}
+                placeholder={
+                  this.props.isMessageEditingMode
+                    ? window.static_translate('edit_message')
+                    : chatContext?.overrideName === undefined
+                      ? window.static_translate('write_message_desktop')
+                      : `${window.static_translate('write_message_desktop')} as ${chatContext?.overrideName}`
+                }
+                disabled={this.props.loadingDraft}
+                dir={
+                  writingDirection === 'rtl'
+                    ? 'rtl'
+                    : 'auto' /* auto is based on content but defaults to ltr */
+                }
+                spellCheck={true}
+                aria-keyshortcuts='Control+M'
+              />
+            )}
+          </ChatContext.Consumer>
         )}
       </I18nContext.Consumer>
     )

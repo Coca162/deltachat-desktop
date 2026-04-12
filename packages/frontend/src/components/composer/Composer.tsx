@@ -101,7 +101,7 @@ const Composer = forwardRef<
   const accountId = selectedAccountId()
   const { openDialog } = useDialog()
   const { sendMessage } = useMessage()
-  const { unselectChat } = useChat()
+  const { unselectChat, setOverrideName, wipeOverrideName } = useChat()
   const { smallScreenMode } = useContext(ScreenContext)
 
   // The philosophy of the editing mode is as follows.
@@ -230,6 +230,21 @@ const Composer = forwardRef<
             return
           }
 
+          let alias = {}
+          if (draftState.text.startsWith(';')) {
+            const i = draftState.text.indexOf(' ')
+            const overrideSenderName = draftState.text.slice(1, i)
+            if (overrideSenderName !== '') {
+              setOverrideName(overrideSenderName)
+            } else {
+              wipeOverrideName()
+            }
+            alias = {
+              text: draftState.text.slice(i + 1),
+              overrideSenderName,
+            }
+          }
+
           const preSendDraftState = draftState
           const sendMessagePromise = sendMessage(accountId, chatId, {
             text: draftState.text,
@@ -240,6 +255,7 @@ const Composer = forwardRef<
                 ? draftState.quote.messageId
                 : null,
             viewtype: draftState.viewType,
+            ...alias,
           })
           // _Immediately_ clear the draft from React state.
           // This does _not_ remove the draft from the back-end yet.

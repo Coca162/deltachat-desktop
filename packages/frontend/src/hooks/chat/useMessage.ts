@@ -81,7 +81,7 @@ const MESSAGE_DEFAULT: T.MessageData = {
 }
 
 export default function useMessage() {
-  const { chatId, selectChat } = useChat()
+  const { chatId, selectChat, overrideName } = useChat()
 
   const jumpToMessage = useCallback<JumpToMessage>(
     async ({
@@ -139,6 +139,7 @@ export default function useMessage() {
     ) => {
       const msgId = await BackendRemote.rpc.sendMsg(accountId, chatId, {
         ...MESSAGE_DEFAULT,
+        overrideSenderName: overrideName ?? null,
         ...message,
       })
 
@@ -154,7 +155,7 @@ export default function useMessage() {
         focus: false,
       })
     },
-    [jumpToMessage]
+    [jumpToMessage, overrideName]
   )
 
   const forwardMessage = useCallback<ForwardMessage>(
