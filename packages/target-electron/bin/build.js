@@ -1,7 +1,7 @@
 import { build } from 'esbuild'
 import { gatherBuildInfo } from '../../../bin/lib/gather-version-info.js'
 
-const isProduction = process.env['NODE_ENV'] === 'production'
+const isProduction = true
 const isMinify = process.argv.indexOf('-m') !== -1
 const BuildInfoString = JSON.stringify(await gatherBuildInfo())
 

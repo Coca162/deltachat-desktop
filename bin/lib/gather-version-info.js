@@ -54,6 +54,6 @@ export async function gatherBuildInfo() {
     BUILD_TIMESTAMP: process.env.SOURCE_DATE_EPOCH
       ? Number(process.env.SOURCE_DATE_EPOCH) * 1000
       : Date.now(),
-    GIT_REF: await getGitRef(),
+    GIT_REF: "no",
   }
 }
