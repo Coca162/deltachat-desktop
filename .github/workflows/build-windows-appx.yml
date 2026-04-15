@@ -1,16 +1,17 @@
 name: Build for windows store (appx unsigned)
 
 on:
-  push:
-    branches:
-      - '*prepare-release*'
-
-permissions: {}
+  workflow_dispatch:
 
 jobs:
   upload-preview:
     runs-on: windows-latest
     name: Upload Preview
+
+    strategy:
+      matrix:
+        version: [portable, appx]
+
     steps:
       # Preperation
       - uses: actions/checkout@v6
@@ -24,11 +25,6 @@ jobs:
           # This makes <https://docs.zizmor.sh/audits/#cache-poisoning> happy.
           package-manager-cache: false
           node-version: 22.x
-      - name: set version ref
-        shell: bash
-        run: |
-          VERSION=$(jq -r .version package.json)
-          echo "VERSION_INFO_GIT_REF=v${VERSION}" >> "$GITHUB_ENV"
       # Building JS
       - name: pnpm install, build
         run: |
@@ -46,18 +42,19 @@ jobs:
         run: |
           cd packages/target-electron
           set DEBUG=electron-builder
-          pnpm electron-builder --win appx
+          pnpm electron-builder --win ${{ matrix.version }}
       - name: WINDOWS renaming / upload Preperation
         working-directory: packages/target-electron/dist
         run: |
           dir
           mkdir preview
-          move Delta*Chat*.appx preview/
+          move *.appx preview/
+          move *.exe preview/
           dir preview
           cd ..
       # Upload Step
       - name: Upload result to artifacts
         uses: actions/upload-artifact@main
         with:
-          name: windows appx release
+          name: windows ${{ matrix.version }} release
           path: packages/target-electron/dist/preview/
