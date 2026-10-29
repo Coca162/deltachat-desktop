@@ -15,6 +15,8 @@ export type SelectChat = (nextAccountId: number, chatId: number) => void
 
 export type UnselectChat = () => void
 
+export type SetSubrpofiles = (subprofiles: Subprofile[]) => void
+
 export type SetOverrideName = (overrideName: string) => void
 
 export type WipeOverrideName = () => void
@@ -39,9 +41,18 @@ export type ChatContextValue = {
   selectChat: SelectChat
   unselectChat: UnselectChat
 
+  subprofiles: Subprofile[]
+  setSubprofiles: SetSubrpofiles
+
   overrideName?: string
   setOverrideName: SetOverrideName
   wipeOverrideName: WipeOverrideName
+}
+
+export type Subprofile = {
+  name: string
+  prefix: string | null
+  suffix: string | null
 }
 
 type Props = {
@@ -103,7 +114,25 @@ export const ChatProvider = ({
     [sessionId]
   )
 
+  const [subprofiles, _setSubprofiles] = useState<Subprofile[]>(() => [])
   const [overrideName, _setOverrideName] = useState<string | undefined>()
+
+  useEffect(() => {
+    let ignore = false
+    if (accountId) {
+      BackendRemote.rpc
+        .getConfig(accountId, 'ui.subprofiles')
+        .then(subprofilesRaw => {
+          if (!ignore && subprofilesRaw) {
+            _setSubprofiles(JSON.parse(subprofilesRaw))
+          }
+        })
+    }
+
+    return () => {
+      ignore = true
+    }
+  }, [accountId])
 
   useEffect(() => {
     window.__selectedChatId = chatId
@@ -283,6 +312,20 @@ export const ChatProvider = ({
     }
   }, [accountId, chatWithLinger, chatId, refreshChat])
 
+  const setSubprofiles = useCallback<SetSubrpofiles>(
+    async (subprofiles: Subprofile[]) => {
+      if (accountId) {
+        await BackendRemote.rpc.setConfig(
+          accountId,
+          'ui.subprofiles',
+          JSON.stringify(subprofiles)
+        )
+        _setSubprofiles(subprofiles)
+      }
+    },
+    [accountId]
+  )
+
   const setOverrideName = useCallback<SetOverrideName>(
     (overrideName: string) => {
       _setOverrideName(overrideName)
@@ -304,6 +347,8 @@ export const ChatProvider = ({
       selectChat,
       unselectChat,
       overrideName,
+      subprofiles,
+      setSubprofiles,
       setOverrideName,
       wipeOverrideName,
     }),
@@ -314,6 +359,8 @@ export const ChatProvider = ({
       chatId,
       selectChat,
       unselectChat,
+      subprofiles,
+      setSubprofiles,
       overrideName,
       setOverrideName,
       wipeOverrideName,

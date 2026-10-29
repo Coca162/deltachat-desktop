@@ -17,6 +17,8 @@ import TransportsDialog from '../dialogs/Transports'
 import { LogDialog } from '../dialogs/Log'
 import { DialogProps } from '../../contexts/DialogContext'
 import { getLogger } from '@deltachat-desktop/shared/logger'
+import useChat from '../../hooks/chat/useChat'
+import { Subprofile } from '../../contexts/ChatContext'
 
 type Props = {
   onClose: DialogProps['onClose']
@@ -27,6 +29,7 @@ const log = getLogger('renderer/settings/advanced')
 export default function Advanced({ onClose }: Props) {
   const tx = useTranslationFunction()
   const { openDialog } = useDialog()
+  const { setSubprofiles } = useChat()
   const openProxySettings = () => {
     openDialog(ProxyConfiguration, {
       accountId: selectedAccountId(),
@@ -56,6 +59,23 @@ export default function Advanced({ onClose }: Props) {
     })
   }
 
+  const openSubprofileSettings = async () => {
+    const pk = JSON.parse(await runtime.readClipboardText())
+
+    const subprofiles: Subprofile[] = []
+    for (const member of pk.members) {
+      for (const tag of member.proxy_tags) {
+        subprofiles.push({
+          name: member.display_name ?? member.name,
+          prefix: tag.prefix,
+          suffix: tag.suffix,
+        })
+      }
+    }
+
+    setSubprofiles(subprofiles)
+  }
+
   const viewLog = () => {
     openDialog(LogDialog)
     // Close the settings dialog so that it doesn't interfere with sharing the log.
@@ -83,6 +103,12 @@ export default function Advanced({ onClose }: Props) {
         dataTestid='open-proxy-settings'
       >
         {tx('proxy_settings')}
+      </SettingsButton>
+      <SettingsButton
+        onClick={openSubprofileSettings}
+        dataTestid='open-subprofile-settings'
+      >
+        Subprofiles
       </SettingsButton>
       <CoreSettingsSwitch
         label={tx('pref_multidevice')}

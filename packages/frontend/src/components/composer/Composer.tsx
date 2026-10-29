@@ -101,7 +101,8 @@ const Composer = forwardRef<
   const accountId = selectedAccountId()
   const { openDialog } = useDialog()
   const { sendMessage } = useMessage()
-  const { unselectChat, setOverrideName, wipeOverrideName } = useChat()
+  const { unselectChat, subprofiles, setOverrideName, wipeOverrideName } =
+    useChat()
 
   // The philosophy of the editing mode is as follows.
   // The edit mode can be thought of as a dialog,
@@ -247,6 +248,24 @@ const Composer = forwardRef<
             alias = {
               text: draftState.text.slice(i + 1),
               overrideSenderName,
+            }
+          }
+
+          for (const subprofile of subprofiles) {
+            if (
+              (subprofile.prefix == null ||
+                draftState.text.startsWith(subprofile.prefix)) &&
+              (subprofile.suffix == null ||
+                draftState.text.endsWith(subprofile.suffix))
+            ) {
+              setOverrideName(subprofile.name)
+              alias = {
+                text: draftState.text.slice(
+                  subprofile.prefix?.length ?? 0,
+                  draftState.text.length - (subprofile.suffix?.length ?? 0)
+                ),
+                overrideSenderName: subprofile.name,
+              }
             }
           }
 
