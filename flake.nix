@@ -2,7 +2,7 @@
   description = "A Nix-flake-based development environment for Delta Chat Desktop";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst";
   };
 
   outputs = {
@@ -46,10 +46,10 @@
           libayatana-appindicator
           # Video/Audio data playback
           gst_all_1.gst-libav
-          gst_all_1.gst-vaapi
+          gst_all_1.gst-plugins-bad
 
           # coding
-          pnpm
+          pnpm_11
           python3 # for bin/link_core/build_and_link_local_core.py script
           typescript-language-server
           vscode-extensions.esbenp.prettier-vscode
